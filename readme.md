@@ -2,7 +2,7 @@
 This is an app that can be used to write, save and delete notes. Its intention is for busy people on the go who needs to store and update personal and business  information as quickly and as efficeintly as possible. This is my first attempt at using express to write backend code. It will retrieve note data from a JSON file.
 
 ## Deploy on heroku
------
+[link to app on heroku](https://akexpress-note-taker.herokuapp.com/)
 
 ## demonstration 
 
