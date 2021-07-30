@@ -5,10 +5,11 @@ This is an app that can be used to write, save and delete notes. Its intention i
 [link to app on heroku](https://akexpress-note-taker.herokuapp.com/)
 
 ## demonstration 
+![note taker](https://user-images.githubusercontent.com/57713429/127676260-4bbb074b-d41a-48ed-979e-b9e5b2cbb9a9.png)
 
------
 
-## How To use
+
+### How To use
 Let's get started! Click on the Get Started button on the home page to start adding notes.
 When you get to the notes page, on the left, you see saved notes along with a delete icon to trash the note when you're done.
 On the right, you can create a new note with a title and notes within the description.
