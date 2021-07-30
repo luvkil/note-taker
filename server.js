@@ -1,81 +1,106 @@
-const fs = require("fs/promises");
-const express = require("express");
-const uuid = require("uuid");
-const dbFilePath = __dirname + "/db/db.json";
+
+
+var express = require("express");
+var path = require("path");
+var fs = require("fs")
+
 // Sets up the Express App
-const app = express();
-const PORT = 3000;
+// =============================================================
+var app = express();
+var PORT = process.env.PORT || 3000;
 
-// parses the body of the request
-//places the data on the `req body`
-app.use(express.json());
+// Sets up the Express app to handle data parsing
 app.use(express.urlencoded({ extended: true }));
-// servers all of our files in public assets
+app.use(express.json());
 app.use(express.static("public"));
-// basic route that sends the user first to the AJAX page.
-app.get(`/`, (req, res) => res.sendFile(__dirname + `/public/index.html`));
-app.get(`/notes`, (req, res) => res.sendFile(__dirname + `/public/notes.html`));
-//app.use(express.static(__dirname));
 
-// GET - /api/notes
-app.get("/api/notes", async function (req, res) {
-  // Read the data from disk.
-  try {
-    const data = await fs.readFile(dbFilePath, "utf-8");
-    //response then parse the data
-    res.json(JSON.parse(data));
-  } catch (err) {
-    res.status(575).end("server failed");
-    console.log(err);
-  }
+// HTML Routes
+// =============================================================
+
+// Basic route that sends the user first to the AJAX Page
+app.get("/", function (req, res) {
+  res.sendFile(path.join(__dirname, "/public/index.html"));
 });
-// Post - /api/notes
-app.post("/api/notes", async function (req, res) {
-  try {
-    // store data in variable
-    const note = req.body;
-    // Read the data from disk.
-    const content = await fs.readFile(dbFilePath, "utf8");
-    /// parse out data the data using JSON.parse
-    const data = JSON.parse(content);
-    note.id = uuid.v1();
-    //add data to parsed array
-    data.push(note);
-    /// waits then writes the data to the page
-    await fs.writeFile(dbFilePath, JSON.stringify(data));
-    //respond to front end
-    res.json(note);
-  } catch (err) {
-    res.status(512).end("server failed");
-    console.log(err);
-  }
+
+app.get("/notes", function (req, res) {
+  res.sendFile(path.join(__dirname, "/public/notes.html"));
+
 });
-// / delete - /api/notes
-app.delete("/api/notes/:id", async function (req, res) {
-  // store data in variable
-  try {
-    const note = req.body;
-    // Read the data from disk.
-    const content = await fs.readFile(dbFilePath, "utf8");
-    // this method tells if true or false
-    /// parse out data the data using JSON.parse
-    let data = JSON.parse(content);
-    // filter over the current array and then post a new array.
-    console.log(Array.isArray(data));
-    data = data.filter((notes, index, array) => notes.id !== req.params.id);
-    /// waits then writes the data to the page
-    await fs.writeFile(dbFilePath, JSON.stringify(data));
-    //respond to front end
-    res.json(note);
-  } catch (err) {
-    res.status(512).end("server failed");
-    console.log(err);
-  }
+
+app.post("/api/notes", function (req, res) {
+  fs.readFile(__dirname + "/db/db.json", 'utf8', function (error, notes) {
+    if (error) {
+      return console.log(error)
+    }
+    notes = JSON.parse(notes)
+
+    var id = notes[notes.length - 1].id + 1
+    var newNote = { title: req.body.title, text: req.body.text, id: id }
+    var activeNote = notes.concat(newNote)
+
+    fs.writeFile(__dirname + "/db/db.json", JSON.stringify(activeNote), function (error, data) {
+      if (error) {
+        return error
+      }
+      console.log(activeNote)
+      res.json(activeNote);
+    })
+  })
+})
+
+// Pull from db.json
+app.get("/api/notes", function (req, res) {
+  fs.readFile(__dirname + "/db/db.json", 'utf8', function (error, data) {
+    if (error) {
+      return console.log(error)
+    }
+    console.log("This is Notes", data)
+    res.json(JSON.parse(data))
+  })
 });
-app.listen(PORT, () => console.log(`App listening on PORT ${PORT} hello mofvccers`));
 
+app.delete("/api/notes/:id", function (req, res) {
+  const noteId = JSON.parse(req.params.id)
+  console.log(noteId)
+  fs.readFile(__dirname + "/db/db.json", 'utf8', function (error, notes) {
+    if (error) {
+      return console.log(error)
+    }
+    notes = JSON.parse(notes)
 
+    notes = notes.filter(val => val.id !== noteId)
 
+    fs.writeFile(__dirname + "/db/db.json", JSON.stringify(notes), function (error, data) {
+      if (error) {
+        return error
+      }
+      res.json(notes)
+    })
+  })
+})
 
+app.put("/api/notes/:id", function(req, res) {
+  const noteId = JSON.parse(req.params.id)
+  console.log(noteId)
+  fs.readFile(__dirname + "db/db.json", "utf8", function(error, notes) {
+    if (error ){
+      return console.log(error)
+    }
+    notes.JSONparse(notes)
 
+    notes = notes.filter(val => val.id !== noteId)
 
+    fs.writeFile(__dirname +"db/db.json", JSON.stringify(notes), function (error, data) {
+      if (error) {
+        return error
+      }
+      res.json(notes)
+    })
+  })
+})
+
+// Starts the server to begin listening
+// =============================================================
+app.listen(PORT, function () {
+  console.log("App listening on PORT " + PORT);
+});
